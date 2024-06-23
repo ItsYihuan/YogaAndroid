@@ -33,6 +33,7 @@ class YogaPose:
     def detect(self, point, rect , center, feet_data_json):
         self.tips = ""
         self.angle_show = ""
+        self.pointsOut = []
         point3d = []
 
         feet_data = FeetData.from_dict(feet_data_json)
@@ -90,14 +91,13 @@ class YogaPose:
             self.roi, self.tips, self.pointsOut = toolkit.BridgeRule(self.roi, self.tips, self.sample_angle_dict, self.angle_dict, point3d)
         elif(self.type == 'Pyramid pose'):
             self.roi, self.tips, self.pointsOut = toolkit.PyramidRule(self.roi, self.tips, self.sample_angle_dict, self.angle_dict, point3d)
-        
+        elif(self.type == 'Mountain pose'):
+            self.roi, self.tips, self.pointsOut = toolkit.PyramidRule(self.roi, self.tips, self.sample_angle_dict, self.angle_dict, point3d)
         # if(self.pointsOut!=[]):
         #     self.pointsOut=self.normalize( point3d,self.pointsOut)
 
         print("pointsOut: ",self.pointsOut)
         return [self.angle_show, self.tips,  self.pointsOut]
-
-
 
 
 if __name__ == "__main__":

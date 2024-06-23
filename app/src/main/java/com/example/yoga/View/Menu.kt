@@ -71,7 +71,9 @@ class Menu : AppCompatActivity() {
             menuBinding.button7 -> menuBinding.button5
             menuBinding.button8 -> menuBinding.button6
             menuBinding.button9 -> menuBinding.button7
-            menuBinding.button10 -> menuBinding.button8
+            menuBinding.button10-> menuBinding.button8
+            menuBinding.button11-> menuBinding.button9
+            menuBinding.button12-> menuBinding.button10
             else -> currentSelect
         }
         selectTo(next)
@@ -85,7 +87,9 @@ class Menu : AppCompatActivity() {
             menuBinding.button5-> menuBinding.button7
             menuBinding.button6-> menuBinding.button8
             menuBinding.button7-> menuBinding.button9
-            menuBinding.button8 ->menuBinding.button10
+            menuBinding.button8-> menuBinding.button10
+            menuBinding.button9-> menuBinding.button11
+            menuBinding.button10-> menuBinding.button12
             else -> currentSelect
         }
         selectTo(next)
@@ -97,6 +101,7 @@ class Menu : AppCompatActivity() {
             menuBinding.button6-> menuBinding.button5
             menuBinding.button8-> menuBinding.button7
             menuBinding.button10-> menuBinding.button9
+            menuBinding.button12-> menuBinding.button11
             else -> currentSelect
         }
         selectTo(next)
@@ -108,6 +113,7 @@ class Menu : AppCompatActivity() {
             menuBinding.button5-> menuBinding.button6
             menuBinding.button7-> menuBinding.button8
             menuBinding.button9-> menuBinding.button10
+            menuBinding.button11-> menuBinding.button12
             else -> currentSelect
         }
         selectTo(next)
@@ -173,7 +179,16 @@ class Menu : AppCompatActivity() {
             selectTo(menuBinding.button10)
             nextpage("Bridge pose")
         }
-
+        menuBinding.button11.setBackgroundColor(Color.BLUE)
+        menuBinding.button11.setOnClickListener {
+            selectTo(menuBinding.button11)
+            nextpage("Mountain pose")
+        }
+        menuBinding.button12.setBackgroundColor(Color.BLUE)
+        menuBinding.button12.setOnClickListener {
+            selectTo(menuBinding.button12)
+            nextpage("Triangle pose")
+        }
         select()
 
         // python start

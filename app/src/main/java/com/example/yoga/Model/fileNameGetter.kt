@@ -17,6 +17,7 @@ class fileNameGetter {
             "Downward dog" -> R.raw.downwarddog_teacher
             "Pyramid pose" -> R.raw.pyramid_teacher
             "Bridge pose" -> R.raw.bridge_teacher
+            "Mountain pose" -> R.raw.mountain_teacher
             else -> R.raw.tree_style
         }
     }

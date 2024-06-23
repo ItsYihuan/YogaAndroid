@@ -431,8 +431,8 @@ class YogaMain : AppCompatActivity() , PoseLandmarkerHelper.LandmarkerListener,K
                             // Handle exceptions when accessing elements if the result doesn't behave like a list
                             println("Result does not have expected list behavior: ${e.message}")
                         }
-                        yogamainBinding.angleShow.text = lastText+ "\n"+ detectlist[0].toString()
-
+                        yogamainBinding.angleShow.text = detectlist[0].toString()
+                        yogamainBinding.tips.text = lastText
                         //30秒計時器
                         //if(true){//debug
                         if (lastText.contains("動作正確")) {

@@ -150,7 +150,7 @@ def treePoseRule(roi, tips, sample_angle_dict, angle_dict, point3d):
                 pointsOut=[] if tip_flag else pointsOut
             else:
                 roi[key] = False
-                tips = "請將右腳抬至高於左腳膝蓋的位置，勿將右腳放在左腳膝蓋上，避免造成膝蓋負擔"+str(AngleNodeDef.LEFT_FOOT_INDEX)
+                tips = "請將右腳抬至高於左腳膝蓋的位置，勿將右腳放在左腳膝蓋上，避免造成膝蓋負擔"
                 pointStart_x, pointStart_y, pointStart_z, pointStart_vi = point3d[AngleNodeDef.LEFT_FOOT_INDEX]
                 pointsOut = [pointStart_x+DISPLACEMENT_DISTANCE, pointStart_y, pointStart_x, pointStart_y] if tip_flag else pointsOut
         elif key == 'LEFT_KNEE':
@@ -199,7 +199,7 @@ def treePoseRule(roi, tips, sample_angle_dict, angle_dict, point3d):
                 roi[key] = False
                 pointStart_x, pointStart_y, pointStart_z, pointStart_vi= point3d[AngleNodeDef.LEFT_SHOULDER] if key=='LEFT_SHOULDER' else point3d[AngleNodeDef.RIGHT_SHOULDER]
                 pointsOut = [pointStart_x, pointStart_y, pointStart_x, pointStart_y-DISPLACEMENT_DISTANCE] if tip_flag else pointsOut
-                tips = "請將雙手合掌並互相施力，往上伸展至頭頂正上方"+str(AngleNodeDef.LEFT_SHOULDER) if tip_flag else tips
+                tips = "請將雙手合掌並互相施力，往上伸展至頭頂正上方" if tip_flag else tips
         elif key == 'LEFT_ELBOW' or key == 'RIGHT_ELBOW':
             if angle_dict[key] == -1:
                 continue
@@ -346,7 +346,7 @@ def warriorIIPoseRule(roi, tips, sample_angle_dict, angle_dict, point3d):
                 continue
             if angle_dict[key]>=150:
                 roi[key] = True
-                pointsOut=[]
+                pointsOut=[] if tip_flag else pointsOut
             elif angle_dict[key]<150 and (left_elbow_y-left_shoulder_y)>0.05:
                 roi[key] = False
                 pointStart_x, pointStart_y, pointStart_z, pointStart_vi = point3d[AngleNodeDef.LEFT_ELBOW]
@@ -1232,7 +1232,6 @@ def SeatedForwardBendRule(roi, tips, sample_angle_dict, angle_dict, point3d):
         pointsOut=[]
     return roi, tips, pointsOut
 
-
 def BridgeRule(roi, tips, sample_angle_dict, angle_dict, point3d):
     """Bridge pose rule
 
@@ -1388,7 +1387,7 @@ def PyramidRule(roi, tips, sample_angle_dict, angle_dict, point3d):
             else:
                 roi["LEG"] = False
                 tips = "請確認是否已經將其中一隻腳向前跨" if tip_flag else tips
-                pointStart_x, pointStart_y, pointStart_z, pointStart_vi = point3d[AngleNodeDef.LEFT_KNEE] if key=="LEFT_KNEE" else point3d[AngleNodeDef.RIGHT_KNEE]
+                pointStart_x, pointStart_y, pointStart_z, pointStart_vi = point3d[AngleNodeDef.LEFT_KNEE] if side=="LEFT" else point3d[AngleNodeDef.RIGHT_KNEE]
                 if key=="LEFT_KNEE":
                     pointsOut = [pointStart_x, pointStart_y ,pointStart_x-DISPLACEMENT_DISTANCE, pointStart_y] if tip_flag else pointsOut
                 else:
@@ -1466,4 +1465,262 @@ def PyramidRule(roi, tips, sample_angle_dict, angle_dict, point3d):
     if tips == "":
         tips = "動作正確"
         pointsOut = []
+    return roi, tips, pointsOut
+
+def MountainPoseRule(roi, tips, sample_angle_dict, angle_dict, point3d):
+    """Mountain pose rule
+
+    Args:
+        roi (list): region of interesting joint for Mountain pose
+        tips (str): tips
+        sample_angle_dict (dict): sample angle dict
+        angle_dict (dict): angle dict
+        point3d (mediapipe): mediapipe detect result
+
+    Returns:
+        roi (dict)
+        tips (str)
+        pointsOut (list)
+    """
+    pointsOut = []
+    tip_flag = False
+
+    if tips == "":
+        tip_flag = True
+
+    for key, _ in roi.items():
+        if key == 'NOSE':
+            nose_y, _, _, nose_vi = (point3d[AngleNodeDef.NOSE])
+            left_hip_y, _, _, left_hip_vi = (point3d[AngleNodeDef.LEFT_HIP])
+            right_hip_y, _, _, right_hip_vi = (point3d[AngleNodeDef.RIGHT_HIP])
+
+            if nose_vi < MIN_DETECT_VISIBILITY:
+                roi[key] = False
+                tips = "請確保頭部正直且面向前方" if tip_flag else tips
+                break
+            else:
+                if abs(nose_y - (left_hip_y + right_hip_y) / 2.0) <= 0.1:
+                    roi[key] = True
+                else:
+                    roi[key] = False
+                    tips = "請確保頭部正直且面向前方" if tip_flag else tips
+
+        if key == 'LEFT_SHOULDER' or key == 'RIGHT_SHOULDER':
+            if angle_dict[key] == -1:
+                continue
+            if 80 <= angle_dict[key] <= 100:
+                roi[key] = True
+            else:
+                roi[key] = False
+                tips = "請保持雙肩平行放置" if tip_flag else tips
+                pointStart_x, pointStart_y, pointStart_z, pointStart_vi = point3d[AngleNodeDef.LEFT_SHOULDER] if key=="LEFT_SHOULDER" else point3d[AngleNodeDef.RIGHT_SHOULDER]
+                pointsOut = [pointStart_x+DISPLACEMENT_DISTANCE, pointStart_y, pointStart_x, pointStart_y] if key=="LEFT_SHOULDER" else [pointStart_x, pointStart_y, pointStart_x-DISPLACEMENT_DISTANCE, pointStart_y] 
+
+        if key == 'LEFT_ELBOW' or key == 'RIGHT_ELBOW':
+            if angle_dict[key] == -1:
+                continue
+            if angle_dict[key] >= 160:
+                roi[key] = True
+            else:
+                roi[key] = False
+                tips = "請將雙臂伸直，放置身體兩側，並將手掌朝向前方" if tip_flag else tips
+                pointStart_x, pointStart_y, pointStart_z, pointStart_vi = point3d[AngleNodeDef.LEFT_ELBOW] if key=="LEFT_ELBOW" else point3d[AngleNodeDef.RIGHT_ELBOW]
+                pointsOut = [pointStart_x, pointStart_y, pointStart_x, pointStart_y+DISPLACEMENT_DISTANCE]
+
+        if key == 'LEFT_HIP' or key == 'RIGHT_HIP':
+            if angle_dict[key] == -1:
+                continue
+            if 80 <= angle_dict[key] <= 100:
+                roi[key] = True
+            else:
+                roi[key] = False
+                tips = "請將身體保持直立" if tip_flag else tips
+                pointStart_x, pointStart_y, pointStart_z, pointStart_vi = point3d[AngleNodeDef.LEFT_HIP] if key=="LEFT_HIP" else point3d[AngleNodeDef.RIGHT_HIP]
+                pointsOut = [pointStart_x, pointStart_y-DISPLACEMENT_DISTANCE, pointStart_x, pointStart_y+DISPLACEMENT_DISTANCE]
+
+        if key == 'LEFT_KNEE' or key == 'RIGHT_KNEE':
+            if angle_dict[key] == -1:
+                continue
+            if angle_dict[key] >= 160:
+                roi[key] = True
+            else:
+                roi[key] = False
+                tips = "請將雙腿伸直併攏" if tip_flag else tips
+                pointStart_x, pointStart_y, pointStart_z, pointStart_vi = point3d[AngleNodeDef.LEFT_KNEE] if key=="LEFT_KNEE" else point3d[AngleNodeDef.RIGHT_KNEE]
+                pointsOut = [pointStart_x, pointStart_y-DISPLACEMENT_DISTANCE, pointStart_x, pointStart_y+DISPLACEMENT_DISTANCE]
+
+        if key == 'LEFT_ANKLE' or key == 'RIGHT_ANKLE':
+            left_ankle_y, _, _, left_ankle_vi = (point3d[AngleNodeDef.LEFT_ANKLE])
+            right_ankle_y, _, _, right_ankle_vi = (point3d[AngleNodeDef.RIGHT_ANKLE])
+
+            if left_ankle_vi < MIN_DETECT_VISIBILITY or right_ankle_vi < MIN_DETECT_VISIBILITY:
+                roi[key] = False
+                tips = "請確保腳踝仍在鏡頭範圍內" if tip_flag else tips
+                break
+            else:
+                if abs(left_ankle_y - right_ankle_y) <= 0.05:
+                    roi[key] = True
+                else:
+                    roi[key] = False
+                    tips = "請保持雙腳平行且腳後跟接觸地面" if tip_flag else tips
+                    pointStart_x, pointStart_y, pointStart_z, pointStart_vi = point3d[AngleNodeDef.LEFT_ANKLE] if key=="LEFT_ANKLE" else point3d[AngleNodeDef.RIGHT_ANKLE]
+                    pointsOut = [pointStart_x+DISPLACEMENT_DISTANCE, pointStart_y, pointStart_x, pointStart_y] if key=="LEFT_ANKLE" else [pointStart_x, pointStart_y, pointStart_x-DISPLACEMENT_DISTANCE, pointStart_y] 
+
+    if tips == "":
+        tips = "動作正確"
+        pointsOut = []
+
+    return roi, tips, pointsOut
+
+def TrianglePoseRule(roi, tips, sample_angle_dict, angle_dict, point3d):
+    """Triangle pose rule
+
+    Args:
+        roi (list): region of interesting joint for Triangle pose
+        tips (str): tips
+        sample_angle_dict (dict): sample angle dict
+        angle_dict (dict): angle dict
+        point3d (mediapipe): mediapipe detect result
+
+    Returns:
+        roi (dict)
+        tips (str)
+        pointsOut (list)
+    """
+    side = ""
+    pointsOut = []
+    tip_flag = False
+
+    if tips == "":
+        tip_flag = True
+
+    for key, _ in roi.items():
+        if key == 'LEFT_HIP':
+            if angle_dict[key] == -1 :
+                continue
+            if angle_dict[key]>=45 and angle_dict[key]<=100:
+                roi["LEFT_HIP"] = True
+                pointsOut=[] if tip_flag else pointsOut
+            else:
+                roi["LEFT_HIP"] = False
+                tips = "請確認是否已經將右腳向右跨，使雙腳呈現大字型" if tip_flag else tips
+                pointStart_x, pointStart_y, pointStart_z, pointStart_vi = point3d[AngleNodeDef.LEFT_KNEE] 
+                pointsOut = [pointStart_x, pointStart_y,pointStart_x+DISPLACEMENT_DISTANCE, pointStart_y] if tip_flag else pointsOut       
+        if key == 'LEFT_SHOULDER':
+            if angle_dict[key] == -1 :
+                continue
+            if angle_dict[key]>=150:
+                roi["LEFT_SHOULDER"] = True
+                pointsOut=[] if tip_flag else pointsOut
+            else:
+                tips = "請將雙手手臂平舉打直" if tip_flag else tips
+                pointStart_x, pointStart_y, pointStart_z, pointStart_vi = point3d[AngleNodeDef.LEFT_ELBOW] 
+                pointsOut = [pointStart_x, pointStart_y,pointStart_x+DISPLACEMENT_DISTANCE, pointStart_y] if tip_flag else pointsOut
+        elif key == 'RIGHT_SHOULDER':
+            if angle_dict[key] == -1 :
+                continue
+            if angle_dict[key]>=150:
+                roi["RIGHT_SHOULDER"] = True
+                pointsOut=[] if tip_flag else pointsOut
+            else:
+                tips = "請將雙手手臂平舉打直" if tip_flag else tips
+                pointStart_x, pointStart_y, pointStart_z, pointStart_vi = point3d[AngleNodeDef.RIGHT_ELBOW] 
+                pointsOut = [pointStart_x, pointStart_y,pointStart_x-DISPLACEMENT_DISTANCE, pointStart_y] if tip_flag else pointsOut
+        elif key == 'RIGHT_FOOT_INDEX':
+            right_foot_index_x,_,_,right_foot_index_vi  =  (point3d[AngleNodeDef.RIGHT_FOOT_INDEX])
+            right_heel_x,_,_,right_heel_vi =  (point3d[AngleNodeDef.RIGHT_HEEL])
+            
+            if right_foot_index_vi < MIN_DETECT_VISIBILITY or  right_heel_vi< MIN_DETECT_VISIBILITY:
+                tips = "請確認腳踝是否位於鏡頭範圍之內" if tip_flag else tips
+                continue
+            if right_foot_index_x < right_heel_x:
+                roi["RIGHT_FOOT_INDEX"] = True
+                pointsOut=[] if tip_flag else pointsOut
+            else:
+                roi["RIGHT_FOOT_INDEX"] = False
+                tips = "請確認是否已經將左腳向左轉" if tip_flag else tips
+                pointStart_x, pointStart_y, pointStart_z, pointStart_vi = point3d[AngleNodeDef.RIGHT_FOOT_INDEX] 
+                pointsOut = [pointStart_x, pointStart_y,pointStart_x-DISPLACEMENT_DISTANCE, pointStart_y] if tip_flag else pointsOut
+        elif key == 'RIGHT_HIP':
+            if angle_dict[key] == -1 :
+                continue
+            if angle_dict[key]<=90:
+                roi["RIGHT_HIP"] = True
+                pointsOut=[] if tip_flag else pointsOut
+            else:
+                roi["RIGHT_HIP"] = False
+                tips = "請確認是否已經將身體向左腳下彎，" if tip_flag else tips
+                point1_x, point1_y, _, _ = point3d[AngleNodeDef.RIGHT_HIP] 
+                point2_x, point2_y, _, _ = point3d[AngleNodeDef.RIGHT_SHOULDER] 
+                pointStart_x = (point1_x+point2_x)/2
+                pointStart_y = (point1_y+point2_y)/2
+                pointsOut = [pointStart_x, pointStart_y,pointStart_x, pointStart_y+DISPLACEMENT_DISTANCE] if tip_flag else pointsOut
+        elif key == 'LEFT_ELBOW':
+            _,left_elbow_y,_,left_elbow_vi  =  (point3d[AngleNodeDef.LEFT_ELBOW])
+            _,left_wrist_y,_,left_wrist_vi =  (point3d[AngleNodeDef.LEFT_WRIST])
+            if left_wrist_vi< MIN_DETECT_VISIBILITY:
+                tips = "請確認右手腕是否位於鏡頭範圍內"
+                continue
+            if left_wrist_y<left_elbow_y and angle_dict[key]>=150:
+                roi["LEFT_ELBOW"] = True
+                pointsOut=[] if tip_flag else pointsOut
+            else:
+                roi["LEFT_ELBOW"] = False
+                tips = "請確認是否已經將右手舉直並向上拉高" if tip_flag else tips
+                pointStart_x, pointStart_y, _, _ = point3d[AngleNodeDef.LEFT_ELBOW] 
+                pointsOut = [pointStart_x, pointStart_y,pointStart_x, pointStart_y-DISPLACEMENT_DISTANCE] if tip_flag else pointsOut
+        elif key == 'RIGHT_ELBOW':
+            _,right_elbow_y,_,right_elbow_vi  =  (point3d[AngleNodeDef.RIGHT_ELBOW])
+            _,right_wrist_y,_,right_wrist_vi =  (point3d[AngleNodeDef.RIGHT_WRIST])
+            if right_wrist_vi< MIN_DETECT_VISIBILITY:
+                tips = "請確認左手腕是否位於鏡頭範圍內"
+                continue
+            if right_elbow_y<right_wrist_y and angle_dict[key]>=150:
+                roi["RIGHT_ELBOW"] = True
+                pointsOut=[] if tip_flag else pointsOut
+            else:
+                roi["RIGHT_ELBOW"] = False
+                tips = "請確認是否已經將左手向下舉直" if tip_flag else tips
+                pointStart_x, pointStart_y, _, _ = point3d[AngleNodeDef.RIGHT_ELBOW] 
+                pointsOut = [pointStart_x, pointStart_y,pointStart_x, pointStart_y+DISPLACEMENT_DISTANCE] if tip_flag else pointsOut
+        
+        elif key =='RIGHT_EYE':
+            _,right_eye_y,_,right_eye_vi  =  (point3d[AngleNodeDef.RIGHT_EYE])
+            _,nose_y,_,nose_vi =  (point3d[AngleNodeDef.NOSE])
+            if nose_y< MIN_DETECT_VISIBILITY:
+                continue
+            if nose_y<right_eye_y:
+                roi["RIGHT_EYE"] = True
+                pointsOut=[] if tip_flag else pointsOut
+            else:
+                roi["RIGHT_EYE"] = False
+                tips = "請確認是否已經將眼睛向上看" if tip_flag else tips
+                pointStart_x, pointStart_y, _, _ = point3d[AngleNodeDef.RIGHT_EYE] 
+                pointsOut = [pointStart_x, pointStart_y,pointStart_x, pointStart_y-DISPLACEMENT_DISTANCE] if tip_flag else pointsOut
+        elif key =='RIGHT_KNEE':
+            if angle_dict[key]==-1:
+                continue
+            if angle_dict[key]>=150:
+                roi["RIGHT_KNEE"] = True
+                pointsOut=[] if tip_flag else pointsOut
+            else:
+                roi["RIGHT_KNEE"] = False
+                tips = "請確認是否已經將左腳打直" if tip_flag else tips
+                pointStart_x, pointStart_y, _, _ = point3d[AngleNodeDef.RIGHT_KNEE] 
+                pointsOut = [pointStart_x-DISPLACEMENT_DISTANCE, pointStart_y-DISPLACEMENT_DISTANCE,pointStart_x, pointStart_y] if tip_flag else pointsOut
+        elif key =='LEFT_KNEE':
+            if angle_dict[key]==-1:
+                continue
+            if angle_dict[key]>=150:
+                roi["LEFT_KNEE"] = True
+                pointsOut=[] if tip_flag else pointsOut
+            else:
+                roi["LEFT_KNEE"] = False
+                tips = "請確認是否已經將右腳打直" if tip_flag else tips
+                pointStart_x, pointStart_y, _, _ = point3d[AngleNodeDef.LEFT_KNEE] 
+                pointsOut = [pointStart_x+DISPLACEMENT_DISTANCE, pointStart_y-DISPLACEMENT_DISTANCE,pointStart_x, pointStart_y] if tip_flag else pointsOut
+    if tips == "":
+        tips = "動作正確"
+        pointsOut = []
+
     return roi, tips, pointsOut

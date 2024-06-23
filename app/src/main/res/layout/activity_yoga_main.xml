@@ -41,7 +41,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/camera"
         app:layout_constraintTop_toBottomOf="@+id/title"
-        app:layout_constraintBottom_toTopOf="@id/imageView2"/>
+        app:layout_constraintBottom_toTopOf="@id/tips" />
+
+    <TextView
+        android:id="@+id/tips"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="1dp"
+        android:text="TextView"
+        app:layout_constraintBottom_toTopOf="@id/imageView2"
+        app:layout_constraintEnd_toStartOf="@+id/camera"
+        app:layout_constraintStart_toStartOf="@+id/angle_show"
+        app:layout_constraintTop_toBottomOf="@+id/angle_show"/>
 
     <androidx.camera.view.PreviewView
         android:id="@+id/camera"
